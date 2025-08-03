@@ -5,17 +5,19 @@ if (window.Telegram && window.Telegram.WebApp) {
     // شروع لود شدن وب‌اپ
     WebApp.ready();
     WebApp.expand(); // مینی‌اپ رو به حداکثر اندازه گسترش میده
+    WebApp.setBackgroundColor('#1e1e2e'); // تنظیم رنگ پس‌زمینه تلگرام
+    WebApp.setHeaderColor('#282a36'); // تنظیم رنگ هدر تلگرام
 
-    // MainButton تلگرام رو فعال می‌کنیم (اختیاری، ولی برای UX بهتره)
+    // MainButton تلگرام رو فعال می‌کنیم
     WebApp.MainButton.text = "به بازی خوش آمدید!";
-    WebApp.MainButton.textColor = "#FFFFFF";
-    WebApp.MainButton.color = "#007bff";
+    WebApp.MainButton.textColor = "#f8f8f2";
+    WebApp.MainButton.color = "#bd93f9"; // رنگ بنفش برای MainButton
     WebApp.MainButton.show();
 
     WebApp.MainButton.onClick(() => {
+        // فعلاً برای تست، یک هشدار ساده نشون میدیم
         WebApp.showAlert("به جنگاوران پارس خوش آمدید!");
-        // اینجا میتونی یک عملیات خاص رو با کلیک روی MainButton انجام بدی
-        // مثلاً بازگشت به صفحه اصلی یا ارسال یک دستور خاص به ربات
+        // در آینده اینجا میتونه برای عملیات تایید یا بازگشت به منوی اصلی استفاده بشه
     });
 
     // عناصر HTML برای نمایش اطلاعات
@@ -28,45 +30,65 @@ if (window.Telegram && window.Telegram.WebApp) {
     const wallAmountElement = document.getElementById('wall-amount');
     const realmLevelElement = document.getElementById('realm-level');
     const adminPanelBtn = document.getElementById('admin-panel-btn'); // دکمه ادمین
+    const loadingScreen = document.getElementById('loading-screen');
+    const mainContent = document.getElementById('main-content');
 
     let currentUserId = null; // برای ذخیره آیدی کاربر
     let isUserAdmin = false; // برای وضعیت ادمین
 
-    // دکمه‌های اقدامات
-    const actionButtons = {
-        'extract-gold-btn': 'استخراج طلا',
-        'battle-btn': 'نبرد',
-        'my-realm-btn': 'قلمرو من',
-        'market-btn': 'بازار',
-        'sepah-btn': 'سپاه',
-        'leaderboard-btn': 'رتبه‌بندی',
-        'extract-resources-btn': 'استخراج منابع',
-        'daily-reward-btn': 'جایزه روزانه',
-        'direct-attack-btn': 'حمله مستقیم',
-        'special-defense-btn': 'دفاع ویژه',
-        'sepah-war-btn': 'نبرد بین سپاهی ⚔️',
-        'black-market-btn': 'بازار سیاه',
-        'game-group-btn': 'گروه بازی',
-        'support-btn': 'پشتیبانی',
-        'arsenal-btn': 'زرادخانه',
-        'defense-equipment-btn': 'تجهیزات دفاعی',
-        'battle-list-btn': 'لیست نبردها',
-        'attack-bot-btn': 'حمله به بات',
-        'invite-friends-btn': 'دعوت دوستان',
-        'game-guide-btn': 'راهنمای بازی',
-        'statement-btn': 'بیانیه',
-        'cyber-warfare-btn': 'جنگ سایبری',
-        'transfer-resources-btn': 'انتقال منابع',
-        'telegram-transfer-btn': 'انتقال به تلگرام',
-        'admin-panel-btn': 'پنل ادمین ⚙️' // این دکمه رو هم اضافه کردیم
+    // دکمه‌های اقدامات و نگاشت آنها به دستورات ربات
+    const actionButtonsMap = {
+        'extract-gold-btn': 'extract_gold',
+        'battle-btn': 'battle',
+        'my-realm-btn': 'my_realm',
+        'market-btn': 'market',
+        'sepah-btn': 'sepah',
+        'leaderboard-btn': 'leaderboard',
+        'extract-resources-btn': 'extract_resources',
+        'daily-reward-btn': 'daily_reward',
+        'direct-attack-btn': 'direct_attack',
+        'special-defense-btn': 'special_defense',
+        'sepah-war-btn': 'sepah_war',
+        'black-market-btn': 'black_market',
+        'game-group-btn': 'game_group',
+        'support-btn': 'support',
+        'arsenal-btn': 'arsenal',
+        'defense-equipment-btn': 'defense_equipment',
+        'battle-list-btn': 'battle_list',
+        'attack-bot-btn': 'attack_bot',
+        'invite-friends-btn': 'invite_friends',
+        'game-guide-btn': 'game_guide',
+        'statement-btn': 'statement',
+        'cyber-warfare-btn': 'cyber_warfare',
+        'transfer-resources-btn': 'transfer_resources',
+        'telegram-transfer-btn': 'telegram_transfer',
+        'admin-panel-btn': 'admin_panel'
     };
 
-    // افزودن Event Listener به تمام دکمه‌ها
-    for (const btnId in actionButtons) {
+    // افزودن Event Listener به تمام دکمه‌ها و افکت Ripple
+    for (const btnId in actionButtonsMap) {
         const button = document.getElementById(btnId);
-        if (button) { // مطمئن میشیم که دکمه وجود داره
-            button.addEventListener('click', () => {
-                handleActionButtonClick(btnId);
+        if (button) {
+            button.addEventListener('click', (e) => {
+                // Ripple Effect
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - (size / 2);
+                const y = e.clientY - rect.top - (size / 2);
+
+                const ripple = document.createElement('span');
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                ripple.classList.add('ripple');
+                button.appendChild(ripple);
+
+                // Remove ripple after animation
+                ripple.addEventListener('animationend', () => {
+                    ripple.remove();
+                });
+
+                handleActionButtonClick(actionButtonsMap[btnId], button.innerText);
             });
         }
     }
@@ -88,38 +110,33 @@ if (window.Telegram && window.Telegram.WebApp) {
     }
 
     // تابعی برای ارسال دستورات به ربات
-    // این تابع در آینده از WebApp.sendData() استفاده خواهد کرد.
-    // فعلاً فقط پیام رو در کنسول نمایش میده و یک پیام تست به کاربر برمی‌گردونه.
-    function sendCommandToBot(command, payload = {}) {
+    // این تابع از WebApp.sendData() استفاده خواهد کرد.
+    function sendCommandToBot(command, actionText, payload = {}) {
         const dataToSend = {
             command: command,
             user_id: currentUserId,
-            // سایر اطلاعاتی که ربات نیاز داره
             payload: payload
         };
 
         // **اینجا نقطه اتصال به ربات پایتونی شماست!**
-        // وقتی Webhook در سمت ربات فعال بشه، WebApp.sendData() اطلاعات رو به ربات میفرسته.
-        WebApp.sendData(JSON.stringify(dataToSend)); // ارسال واقعی داده به ربات
+        // WebApp.sendData() اطلاعات رو به ربات میفرسته.
+        WebApp.sendData(JSON.stringify(dataToSend));
 
-        console.log(`[Mini-App] ارسال دستور: ${command} با داده:`, dataToSend);
-        // نمایش یک پیام موقت برای کاربر تا زمانی که ربات واقعی جواب بده
-        WebApp.showNotification({
-            message: `دستور "${command}" ارسال شد. منتظر پاسخ ربات باشید...`,
-            type: 'info'
-        });
+        console.log(`[Mini-App] ارسال دستور: "${command}" با داده:`, dataToSend);
+        
+        WebApp.MainButton.text = `در حال انجام: ${actionText}...`;
+        WebApp.MainButton.showProgress(); // نمایش لودینگ روی MainButton
+        WebApp.MainButton.disable(); // غیرفعال کردن دکمه اصلی
 
         // **شبیه‌سازی دریافت پاسخ از ربات**
-        // در حالت واقعی، پاسخ از طریق WebApp.onEvent('invoiceClosed', ...) یا
-        // WebApp.onEvent('the custom event from bot', ...) دریافت میشه.
-        // فعلاً بعد از 2 ثانیه یک پاسخ شبیه‌سازی شده دریافت می‌کنیم.
+        // این قسمت باید در آینده توسط ربات واقعی شما مدیریت شود که پاسخ را به مینی‌اپ برگرداند.
+        // تا آن زمان، ما پاسخ را شبیه‌سازی می‌کنیم.
         setTimeout(() => {
             const simulatedResponse = {
                 command: `${command}_response`,
-                status: 'success',
-                message: `✅ دستور "${actionButtons[command]}" با موفقیت انجام شد!`,
-                // اطلاعات جدید بازیکن (مثلا بعد از جمع‌آوری منابع)
-                player_stats: {
+                status: 'success', // یا 'error'
+                message: `✅ دستور "${actionText}" با موفقیت انجام شد!`,
+                player_stats: { // اطلاعات بازیکن بعد از انجام عملیات (مثلاً بعد از جمع‌آوری)
                     gold: Math.floor(Math.random() * 1000) + 1000,
                     diamonds: Math.floor(Math.random() * 50) + 100,
                     food: Math.floor(Math.random() * 5000) + 2000,
@@ -130,12 +147,16 @@ if (window.Telegram && window.Telegram.WebApp) {
                 }
             };
             handleBotResponse(simulatedResponse);
-        }, 2000);
+        }, 2000); // شبیه‌سازی 2 ثانیه تأخیر
     }
 
     // تابعی برای پردازش پاسخ‌های دریافتی از ربات
+    // این تابع در حالت واقعی، توسط WebApp.onEvent('messageFromBot', ...) فراخوانی می‌شود
     function handleBotResponse(response) {
         console.log("[Mini-App] دریافت پاسخ از ربات:", response);
+        WebApp.MainButton.hideProgress(); // لودینگ رو مخفی می‌کنیم
+        WebApp.MainButton.enable(); // دکمه اصلی رو فعال می‌کنیم
+
         if (response.status === 'success' && response.player_stats) {
             updatePlayerStats(response.player_stats);
             WebApp.showNotification({
@@ -148,31 +169,41 @@ if (window.Telegram && window.Telegram.WebApp) {
                 type: 'error'
             });
         }
-        // اگر لازم باشه MainButton رو بعد از عملیات تغییر میدیم
-        WebApp.MainButton.text = "عملیات انجام شد!";
-        WebApp.MainButton.show();
+        // بازگرداندن متن دکمه اصلی به حالت پیش فرض
+        WebApp.MainButton.text = "به جنگاوران پارس خوش آمدید!";
+        WebApp.MainButton.color = isUserAdmin ? "#e83e8c" : "#007bff"; // رنگ ادمین یا پیش فرض
     }
 
     // هندلر کلیک دکمه‌های اقدامات
-    function handleActionButtonClick(buttonId) {
-        const command = buttonId.replace('-btn', ''); // مثلا 'extract-gold'
-        const actionText = actionButtons[buttonId]; // متن دکمه، مثلا 'استخراج طلا'
-        
-        WebApp.MainButton.text = `در حال انجام: ${actionText}...`;
-        WebApp.MainButton.showProgress(); // نمایش لودینگ روی MainButton
-
-        // اینجا دستور واقعی به ربات ارسال میشه
-        // در آینده، payload میتونه شامل مقادیر خاصی باشه (مثلا تعداد سرباز برای ساخت)
-        sendCommandToBot(command, { button_text: actionText });
+    function handleActionButtonClick(command, actionText) {
+        sendCommandToBot(command, actionText);
     }
 
     // **مهم: دریافت اطلاعات اولیه بازیکن در زمان لود شدن مینی‌اپ**
-    // وقتی مینی‌اپ لود میشه، نیاز داره اطلاعات فعلی بازیکن رو از ربات بگیره.
-    // این یک شبیه‌سازی است، در آینده باید ربات واقعی اطلاعات رو بفرسته.
+    // این یک شبیه‌سازی است. در آینده باید ربات واقعی اطلاعات رو بفرسته.
     if (WebApp.initDataUnsafe && WebApp.initDataUnsafe.user) {
-        // فرض می‌کنیم در شروع، ربات اطلاعات اولیه رو به مینی‌اپ میفرسته
-        // در حالت واقعی، ربات باید از طریق API تلگرام (مثل sendWebAppMessage) این دیتا رو بفرسته.
-        // یا مینی‌اپ درخواستی به وب‌هوک ربات بفرسته و ربات جواب بده.
+        currentUserId = WebApp.initDataUnsafe.user.id;
+        userInfoElement.innerText = `سلام، ${WebApp.initDataUnsafe.user.first_name || 'کاربر عزیز'}!`;
+        if (WebApp.initDataUnsafe.user.username) {
+            userInfoElement.innerText += ` (@${WebApp.initDataUnsafe.user.username})`;
+        }
+        userInfoElement.innerText += `\nآیدی شما: ${WebApp.initDataUnsafe.user.id}`;
+
+        // شبیه‌سازی نقش ادمین (این باید توسط ربات تأیید شود)
+        const ADMIN_IDS_SIMULATED = ["8126836242", "1755368060"]; // آیدی‌های ادمین
+        if (ADMIN_IDS_SIMULATED.includes(String(currentUserId))) {
+            isUserAdmin = true;
+            adminPanelBtn.classList.remove('hidden'); // نمایش دکمه ادمین
+            WebApp.MainButton.text = "شما ادمین هستید!";
+            WebApp.MainButton.color = "#e83e8c"; // رنگ ادمین
+        } else {
+            adminPanelBtn.classList.add('hidden'); // اطمینان از مخفی بودن دکمه ادمین
+            WebApp.MainButton.text = "به جنگاوران پارس خوش آمدید!";
+            WebApp.MainButton.color = "#007bff";
+        }
+        WebApp.MainButton.show();
+
+        // شبیه‌سازی اطلاعات اولیه بازیکن
         const initialPlayerStats = {
             gold: 5000,
             diamonds: 1500,
@@ -184,50 +215,45 @@ if (window.Telegram && window.Telegram.WebApp) {
         };
         updatePlayerStats(initialPlayerStats);
 
-        // چک می‌کنیم که کاربر ادمین هست یا نه (فعلاً شبیه‌سازی)
-        // در آینده باید ربات این اطلاعات رو بفرسته
-        const ADMIN_IDS_SIMULATED = ["8126836242", "1755368060"]; // مثال: آیدی ادمین‌ها
-        if (ADMIN_IDS_SIMULATED.includes(String(WebApp.initDataUnsafe.user.id))) {
-            isUserAdmin = true;
-            adminPanelBtn.classList.remove('hidden'); // نمایش دکمه ادمین
-            WebApp.MainButton.text = "شما ادمین هستید!";
-            WebApp.MainButton.color = "#e83e8c"; // رنگ صورتی برای ادمین
-            WebApp.MainButton.show();
-        } else {
-            adminPanelBtn.classList.add('hidden'); // اطمینان از مخفی بودن دکمه ادمین
-            WebApp.MainButton.text = "به جنگاوران پارس خوش آمدید!";
-            WebApp.MainButton.color = "#007bff";
-            WebApp.MainButton.show();
-        }
+        // مخفی کردن صفحه لودینگ و نمایش محتوای اصلی
+        setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            loadingScreen.addEventListener('transitionend', () => {
+                loadingScreen.style.display = 'none';
+                mainContent.style.opacity = '1'; // شروع انیمیشن fadeIn برای محتوا
+                mainContent.style.transform = 'translateY(0)';
+            }, { once: true });
+        }, 2000); // 2 ثانیه نمایش لودینگ
 
     } else {
-        userInfoElement.innerText = 'اطلاعات کاربر در دسترس نیست. لطفاً از طریق تلگرام باز کنید.';
-        closeButton.style.display = 'none';
-        // دکمه‌های اکشن رو مخفی می‌کنیم اگه اطلاعات کاربر نیست
-        document.querySelectorAll('.action-button').forEach(btn => btn.style.display = 'none');
+        // اگر WebApp API لود نشد (مثلاً داری تو مرورگر تست می‌کنی)
+        document.body.innerHTML = `
+            <div class="container" style="text-align: center; margin-top: 50px;">
+                <h1>خطا در بارگذاری مینی‌اپ</h1>
+                <p>این مینی‌اپ باید از طریق <strong>تلگرام</strong> باز شود.</p>
+                <p>لطفاً ربات را در تلگرام باز کرده و سپس از طریق آن اقدام کنید.</p>
+            </div>
+        `;
+        document.body.style.backgroundColor = 'var(--background-dark)';
+        document.body.style.color = 'var(--text-light)';
+        document.body.style.display = 'flex';
+        document.body.style.justifyContent = 'center';
+        document.body.style.alignItems = 'center';
         WebApp.MainButton.hide();
     }
 
-    // اگر ربات پاسخی از طریق WebApp.onEvent('messageFromBot') دریافت کند (برای ارتباط دوطرفه)
-    // این قسمت نیاز به پیاده‌سازی در سمت ربات هم دارد تا با متد WebApp.postEvent پیام بفرستد.
-    WebApp.onEvent('messageFromBot', (event) => {
-        const response = event.data; // داده‌های ارسالی از ربات
-        if (response) {
-            handleBotResponse(response);
-            WebApp.MainButton.hideProgress(); // لودینگ رو مخفی می‌کنیم
-        }
-    });
-
 } else {
-    // اگه WebApp API لود نشد (مثلاً داری تو مرورگر تست می‌کنی)
+    // برای حالتی که WebApp API اصلاً وجود نداره (نه فقط لود نشده)
     document.body.innerHTML = `
-        <div class="container" style="text-align: center;">
+        <div class="container" style="text-align: center; margin-top: 50px;">
             <h1>خطا در بارگذاری مینی‌اپ</h1>
-            <p>این مینی‌اپ باید از طریق **تلگرام** باز شود.</p>
+            <p>این مینی‌اپ باید از طریق <strong>تلگرام</strong> باز شود.</p>
             <p>لطفاً ربات را در تلگرام باز کرده و سپس از طریق آن اقدام کنید.</p>
         </div>
     `;
-    document.body.style.display = 'flex'; // برای نمایش در وسط صفحه
+    document.body.style.backgroundColor = 'var(--background-dark)';
+    document.body.style.color = 'var(--text-light)';
+    document.body.style.display = 'flex';
     document.body.style.justifyContent = 'center';
     document.body.style.alignItems = 'center';
 }

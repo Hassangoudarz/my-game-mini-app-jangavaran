@@ -7,14 +7,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #ffcc00; /* طلایی برای عناصر اصلی */
-            --secondary-color: #007bff; /* آبی برای دکمه‌های اصلی */
-            --background-dark: #1a1a1a; /* پس‌زمینه خیلی تیره */
-            --card-background: #2a2a2a; /* پس‌زمینه کارت‌ها */
-            --text-light: #e0e0e0; /* متن روشن */
-            --text-accent: #aaffaa; /* متن برجسته (سبز) */
-            --button-danger: #dc3545; /* قرمز برای دکمه‌های خطر */
-            --border-color: #444; /* رنگ حاشیه */
+            --primary-color: #ffcc00; /* طلایی از لوگو */
+            --secondary-color: #36a2eb; /* آبی ملایم */
+            --accent-color: #ff6384; /* صورتی/قرمز ملایم برای تمایز */
+            --background-dark: #1e1e2e; /* پس‌زمینه تیره و مدرن */
+            --card-background: #282a36; /* پس‌زمینه کارت‌ها/عناصر */
+            --text-light: #f8f8f2; /* متن روشن */
+            --text-secondary: #bd93f9; /* بنفش برای متن‌های خاص */
+            --button-bg-default: #50fa7b; /* سبز روشن برای دکمه‌های اصلی */
+            --button-text-default: #282a36;
+            --button-bg-hover: #69ff94;
+            --button-bg-danger: #ff5555; /* قرمز برای دکمه‌های خطر */
+            --button-bg-danger-hover: #ff7f7f;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
         }
 
         body {
@@ -26,60 +33,116 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px 10px; /* کاهش پدینگ افقی برای موبایل */
+            padding: 20px 10px;
             box-sizing: border-box;
-            text-align: center;
-            overflow-x: hidden; /* جلوگیری از اسکرول افقی */
-            -webkit-tap-highlight-color: transparent; /* حذف هایلایت آبی در تاچ */
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            position: relative; /* برای صفحه لودینگ */
         }
 
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 1;
+            animation: fadeOut 0.5s ease-in-out forwards; /* انیمیشن fade out */
+            animation-delay: 2s; /* تاخیر قبل از شروع محتوا */
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; visibility: visible; }
+            99% { opacity: 0; visibility: visible; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* Main Content */
         .container {
             background-color: var(--card-background);
-            padding: 25px; /* کمی کمتر از قبل */
-            border-radius: 15px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 6px 12px var(--shadow-color);
             max-width: 500px;
             width: 100%;
             margin-bottom: 20px;
-            border: 1px solid var(--border-color); /* حاشیه دور کانتینر */
+            border: 1px solid var(--border-color);
+            opacity: 0; /* ابتدا مخفی تا لودینگ بره */
+            transform: translateY(20px);
+            animation: fadeIn 0.8s ease-out forwards;
+            animation-delay: 2.2s; /* تاخیر بعد از لودینگ */
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         h1 {
             color: var(--primary-color);
             margin-bottom: 20px;
-            font-size: 1.8em; /* کمی کوچکتر */
+            font-size: 2em;
+            text-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
         }
 
         h2 {
-            color: var(--primary-color);
+            color: var(--text-secondary);
             margin-top: 25px;
             margin-bottom: 15px;
             font-size: 1.4em;
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 2px solid var(--text-secondary);
             padding-bottom: 5px;
-            display: inline-block; /* برای اینکه خط زیر متن رو بگیره */
+            display: inline-block;
         }
 
         p {
-            font-size: 1em; /* کمی کوچکتر */
+            font-size: 1em;
             line-height: 1.5;
             margin-bottom: 10px;
         }
 
         .player-stats {
-            background-color: #333; /* رنگ متمایزتر برای بخش آمار */
+            background-color: #383a4c; /* رنگ تیره تر برای آمار */
             padding: 15px;
-            border-radius: 10px;
+            border-radius: var(--border-radius);
             margin-top: 20px;
             text-align: right;
             border: 1px solid var(--border-color);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3); /* سایه داخلی */
         }
 
         .player-stats div {
             margin-bottom: 8px;
-            display: flex; /* استفاده از فلکس برای تراز کردن متن و مقدار */
-            justify-content: space-between; /* فاصله انداختن بین نام و مقدار */
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            padding: 4px 0;
+        }
+        .player-stats div:last-child {
+            margin-bottom: 0;
         }
 
         .player-stats strong {
@@ -90,92 +153,91 @@
 
         .player-stats span {
             font-weight: bold;
+            color: var(--text-light);
         }
 
-        /* چیدمان دکمه‌های اصلی */
-        .main-actions, .other-actions {
+        /* چیدمان دکمه‌های اصلی (Grid Layout) */
+        .main-actions {
             margin-top: 30px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* کمی افزایش عرض دکمه */
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* کمی افزایش عرض دکمه و انعطاف بیشتر */
+            gap: 12px; /* فاصله کمتر بین دکمه‌ها */
+        }
+        
+        .main-actions button {
+            background-color: var(--button-bg-default);
+            color: var(--button-text-default);
+            padding: 14px 10px; /* پدینگ بیشتر برای دکمه‌ها */
+            border-radius: 10px; /* گردی بیشتر */
+            font-size: 1em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all var(--transition-speed) ease;
+            position: relative; /* برای انیمیشن */
+            overflow: hidden; /* برای افکت موجی */
         }
 
-        button {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 12px 10px; /* پدینگ برای دکمه‌ها */
-            border-radius: 8px;
-            font-size: 0.95em; /* کمی کوچکتر برای جا شدن متن */
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            width: 100%;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        .main-actions button:hover {
+            background-color: var(--button-bg-hover);
+            transform: translateY(-3px) scale(1.02); /* افکت بزرگ شدن و بالا رفتن */
+            box-shadow: 0 6px 12px var(--shadow-color);
         }
 
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px); /* افکت کوچک هاور */
-        }
-
-        button:active {
+        .main-actions button:active {
             transform: translateY(0);
+            box-shadow: 0 2px 4px var(--shadow-color);
         }
 
+        /* Ripple effect for buttons */
+        .main-actions button::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            width: 100px;
+            height: 100px;
+            margin-top: -50px;
+            margin-left: -50px;
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+            transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+        }
+
+        .main-actions button.ripple::after {
+            transform: scale(2);
+            opacity: 1;
+            transition: 0s; /* Reset transition for fast re-trigger */
+        }
+
+        /* دکمه بستن مینی‌اپ */
         #close-button {
-            background-color: var(--button-danger);
+            background-color: var(--button-bg-danger);
+            color: var(--text-light);
             margin-top: 30px;
-            width: fit-content; /* عرض متناسب با محتوا */
+            width: fit-content;
             padding: 12px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 8px var(--shadow-color);
         }
         #close-button:hover {
-            background-color: #c82333;
-        }
-
-        /* استایل‌های خاص برای دکمه‌ها بر اساس ردیف اصلی پایتون */
-        .action-button.economic {
-            background-color: #28a745; /* سبز */
-        }
-        .action-button.military {
-            background-color: #ffc107; /* زرد */
-            color: #333;
-        }
-        .action-button.guild {
-            background-color: #6f42c1; /* بنفش */
-        }
-        .action-button.social {
-            background-color: #17a2b8; /* فیروزه‌ای */
-        }
-        .action-button.utilities {
-            background-color: #6c757d; /* خاکستری */
-        }
-        .action-button.admin {
-            background-color: #e83e8c; /* صورتی */
-        }
-        .action-button.cyber {
-            background-color: #00c0c0; /* آبی فیروزه ای */
-        }
-        .action-button.transfer {
-            background-color: #fd7e14; /* نارنجی */
-        }
-        .action-button.telegram {
-            background-color: #0088cc; /* آبی تلگرام */
+            background-color: var(--button-bg-danger-hover);
+            transform: translateY(-2px);
         }
 
         /* مخفی کردن دکمه‌های خاص در صورت نیاز (توسط JS کنترل می‌شود) */
         .hidden {
             display: none !important;
         }
-
-        /* استایل برای MainButton تلگرام */
+        
+        /* Telegram MainButton (handled by Telegram WebApp API directly) */
+        /*
         .telegram-main-button {
             background-color: var(--secondary-color);
             color: white;
             padding: 15px;
             font-size: 1.1em;
             width: 100%;
-            position: fixed; /* دکمه اصلی همیشه پایین صفحه باشد */
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
@@ -188,68 +250,76 @@
         .telegram-main-button:hover {
             background-color: #0056b3;
         }
+        */
 
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p style="font-size:1.2em; color:var(--text-light);">در حال ورود به دنیای جنگاوران پارس...</p>
+    </div>
+
+    <div class="container" id="main-content">
         <h1>⚔️ جنگاوران پارس ⚔️</h1>
         <p id="user-info">در حال بارگذاری اطلاعات کاربر...</p>
 
         <h2>وضعیت قلمرو شما:</h2>
         <div class="player-stats">
-            <div><span>طلا:</span> <strong id="gold-amount">0</strong> 💰</div>
-            <div><span>الماس:</span> <strong id="diamond-amount">0</strong> 💎</div>
-            <div><span>غذا:</span> <strong id="food-amount">0</strong> 🍖</div>
-            <div><span>بلوک:</span> <strong id="block-amount">0</strong> 🧱</div>
-            <div><span>سرباز:</span> <strong id="soldier-amount">0</strong> 💂‍♂️</div>
-            <div><span>دیوار:</span> <strong id="wall-amount">0</strong> 🛡️</div>
-            <div><span>سطح قلمرو:</span> <strong id="realm-level">1</strong> 🌟</div>
+            <div><span>طلا:</span> <strong id="gold-amount">0</strong></div>
+            <div><span>الماس:</span> <strong id="diamond-amount">0</strong></div>
+            <div><span>غذا:</span> <strong id="food-amount">0</strong></div>
+            <div><span>بلوک:</span> <strong id="block-amount">0</strong></div>
+            <div><span>سرباز:</span> <strong id="soldier-amount">0</strong></div>
+            <div><span>دیوار:</span> <strong id="wall-amount">0</strong></div>
+            <div><span>سطح قلمرو:</span> <strong id="realm-level">1</strong></div>
         </div>
 
-        <h2>منوی اصلی:</h2>
+        <h2>اقدامات اصلی:</h2>
         <div class="main-actions">
-            <button id="extract-gold-btn" class="action-button economic">💰 استخراج طلا</button>
-            <button id="battle-btn" class="action-button military">⚔️ نبرد</button>
+            <button id="extract-gold-btn" class="action-button">💰 استخراج طلا</button>
+            <button id="battle-btn" class="action-button">⚔️ نبرد</button>
             
-            <button id="my-realm-btn" class="action-button military">🏰 قلمرو من</button>
-            <button id="market-btn" class="action-button economic">🛒 بازار</button>
+            <button id="my-realm-btn" class="action-button">🏰 قلمرو من</button>
+            <button id="market-btn" class="action-button">🛒 بازار</button>
 
-            <button id="sepah-btn" class="action-button guild">⚔️ سپاه</button>
-            <button id="leaderboard-btn" class="action-button social">🏆 رتبه‌بندی</button>
+            <button id="sepah-btn" class="action-button">⚔️ سپاه</button>
+            <button id="leaderboard-btn" class="action-button">🏆 رتبه‌بندی</button>
 
-            <button id="extract-resources-btn" class="action-button economic">⛏️ استخراج منابع</button>
-            <button id="daily-reward-btn" class="action-button economic">🎁 جایزه روزانه</button>
+            <button id="extract-resources-btn" class="action-button">⛏️ استخراج منابع</button>
+            <button id="daily-reward-btn" class="action-button">🎁 جایزه روزانه</button>
 
-            <button id="direct-attack-btn" class="action-button military">🎯 حمله مستقیم</button>
-            <button id="special-defense-btn" class="action-button military">🛡️ دفاع ویژه</button>
+            <button id="direct-attack-btn" class="action-button">🎯 حمله مستقیم</button>
+            <button id="special-defense-btn" class="action-button">🛡️ دفاع ویژه</button>
 
-            <button id="sepah-war-btn" class="action-button guild">⚔️ نبرد بین سپاهی ⚔️</button>
-            <button id="black-market-btn" class="action-button economic">📦 بازار سیاه</button>
+            <button id="sepah-war-btn" class="action-button">⚔️ نبرد بین سپاهی ⚔️</button>
+            <button id="black-market-btn" class="action-button">📦 بازار سیاه</button>
 
-            <button id="game-group-btn" class="action-button social">💬 گروه بازی</button>
-            <button id="support-btn" class="action-button social">📞 پشتیبانی</button>
+            <button id="game-group-btn" class="action-button">💬 گروه بازی</button>
+            <button id="support-btn" class="action-button">📞 پشتیبانی</button>
 
-            <button id="arsenal-btn" class="action-button military">⚔️ زرادخانه</button>
-            <button id="defense-equipment-btn" class="action-button military">🛡️ تجهیزات دفاعی</button>
+            <button id="arsenal-btn" class="action-button">⚔️ زرادخانه</button>
+            <button id="defense-equipment-btn" class="action-button">🛡️ تجهیزات دفاعی</button>
 
-            <button id="battle-list-btn" class="action-button military">📜 لیست نبردها</button>
-            <button id="attack-bot-btn" class="action-button military">🤖 حمله به بات</button>
+            <button id="battle-list-btn" class="action-button">📜 لیست نبردها</button>
+            <button id="attack-bot-btn" class="action-button">🤖 حمله به بات</button>
             
-            <button id="invite-friends-btn" class="action-button social">➕ دعوت دوستان</button>
-            <button id="game-guide-btn" class="action-button utilities">❓ راهنمای بازی</button>
+            <button id="invite-friends-btn" class="action-button">➕ دعوت دوستان</button>
+            <button id="game-guide-btn" class="action-button">❓ راهنمای بازی</button>
 
-            <button id="statement-btn" class="action-button social">✍️ بیانیه</button>
+            <button id="statement-btn" class="action-button">✍️ بیانیه</button>
 
-            <button id="cyber-warfare-btn" class="action-button cyber">💻 جنگ سایبری</button>
+            <button id="cyber-warfare-btn" class="action-button">💻 جنگ سایبری</button>
 
-            <button id="transfer-resources-btn" class="action-button transfer">🎁 انتقال منابع</button>
+            <button id="transfer-resources-btn" class="action-button">🎁 انتقال منابع</button>
 
-            <button id="telegram-transfer-btn" class="action-button telegram">✈️ انتقال به تلگرام ✈️</button>
+            <button id="telegram-transfer-btn" class="action-button">✈️ انتقال به تلگرام ✈️</button>
 
-            <button id="admin-panel-btn" class="action-button admin hidden">⚙️ پنل ادمین ⚙️</button>
+            <button id="admin-panel-btn" class="action-button hidden">⚙️ پنل ادمین ⚙️</button>
         </div>
     </div>
+
+    <button id="close-button">بستن مینی‌اپ</button>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="script.js"></script>
