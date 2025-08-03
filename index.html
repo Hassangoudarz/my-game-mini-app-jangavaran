@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بازی جنگاوران</title>
+    <title>جنگاوران پارس - مینی‌اپ</title>
     <style>
         body {
             font-family: 'BlinkMacSystemFont', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -11,9 +11,9 @@
             color: #e0e0e0; /* رنگ متن روشن */
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* شروع از بالا */
             align-items: center;
-            height: 100vh;
+            min-height: 100vh; /* حداقل ارتفاع تمام صفحه */
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
@@ -24,30 +24,65 @@
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
+            max-width: 450px; /* کمی پهن‌تر */
             width: 100%;
+            margin-top: 20px; /* فاصله از بالا */
         }
         h1 {
             color: #ffcc00; /* رنگ طلایی برای عنوان */
             margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        h2 {
+            color: #a0d911; /* رنگ سبز روشن */
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
         }
         p {
             font-size: 1.1em;
             line-height: 1.6;
+            margin-bottom: 10px;
         }
-        button {
+        #user-info {
+            font-size: 1.2em;
+            color: #b0b0b0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+        }
+        #player-stats p {
+            margin: 5px 0;
+            text-align: right; /* راست‌چین کردن آمار */
+            padding-right: 20px;
+        }
+        #player-stats strong {
+            display: inline-block;
+            min-width: 80px; /* برای هم‌ترازی */
+        }
+        #actions-container button {
             background-color: #007bff; /* رنگ دکمه آبی */
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 12px 20px;
             border-radius: 8px;
             font-size: 1em;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin-top: 20px;
+            margin: 10px 5px; /* فاصله بین دکمه‌ها */
+            width: calc(50% - 10px); /* دو دکمه در یک ردیف */
+            box-sizing: border-box;
         }
-        button:hover {
+        #actions-container button:hover {
             background-color: #0056b3;
+        }
+        #close-button {
+            background-color: #dc3545; /* رنگ دکمه قرمز برای بستن */
+            margin-top: 30px;
+            width: calc(100% - 20px); /* دکمه بستن کامل ردیف */
+        }
+        #close-button:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
@@ -55,6 +90,11 @@
     <div class="container">
         <h1>به مینی‌اپ بازی جنگاوران خوش آمدید!</h1>
         <p id="user-info">در حال بارگذاری اطلاعات...</p>
+        <div id="player-stats">
+            <p>در حال دریافت وضعیت بازیکن...</p>
+        </div>
+        <div id="actions-container">
+            </div>
         <button id="close-button">بستن مینی‌اپ</button>
     </div>
 
