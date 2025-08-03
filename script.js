@@ -1,24 +1,22 @@
-// چک می‌کنیم که Telegram Web App API آماده هست یا نه
-if (window.Telegram && window.Telegram.WebApp) {
-    const WebApp = window.Telegram.WebApp;
+// چک می‌کنیم که Bale Web App API آماده هست یا نه
+// API بله از window.Bale.WebApp استفاده می‌کند.
+if (window.Bale && window.Bale.WebApp) {
+    const WebApp = window.Bale.WebApp;
 
     // شروع لود شدن وب‌اپ
     WebApp.ready();
     WebApp.expand(); // مینی‌اپ رو به حداکثر اندازه گسترش میده
-    WebApp.setBackgroundColor('#1e1e2e'); // تنظیم رنگ پس‌زمینه تلگرام
-    WebApp.setHeaderColor('#282a36'); // تنظیم رنگ هدر تلگرام
 
-    // MainButton تلگرام رو فعال می‌کنیم
-    WebApp.MainButton.text = "به بازی خوش آمدید!";
-    WebApp.MainButton.textColor = "#f8f8f2";
-    WebApp.MainButton.color = "#bd93f9"; // رنگ بنفش برای MainButton
-    WebApp.MainButton.show();
+    // تنظیم رنگ‌های هدر و پس‌زمینه تلگرام (اختیاری، اگر بله پشتیبانی کنه)
+    // بر اساس مستندات بله، این متدها در نسخه 1.1 موجودند
+    // WebApp.setHeaderColor('#2d3748'); // secondary_bg_color from :root
+    // WebApp.setBackgroundColor('#1a202c'); // background_deep_dark from :root
 
-    WebApp.MainButton.onClick(() => {
-        // فعلاً برای تست، یک هشدار ساده نشون میدیم
-        WebApp.showAlert("به جنگاوران پارس خوش آمدید!");
-        // در آینده اینجا میتونه برای عملیات تایید یا بازگشت به منوی اصلی استفاده بشه
-    });
+    // MainButton بله رو فعال می‌کنیم (اختیاری، اما برای UX خوبه)
+    // در بله، MainButton مستقیماً در API جاوااسکریپت وجود ندارد،
+    // اما می‌توانید از backButton یا sendData استفاده کنید.
+    // اگر MainButton تلگرام را می‌خواستید، در بله باید دکمه خودتان را طراحی کنید.
+    // فعلاً این بخش برای بله از WebApp.MainButton تلگرام برداشته شده.
 
     // عناصر HTML برای نمایش اطلاعات
     const userInfoElement = document.getElementById('user-info');
@@ -37,32 +35,33 @@ if (window.Telegram && window.Telegram.WebApp) {
     let isUserAdmin = false; // برای وضعیت ادمین
 
     // دکمه‌های اقدامات و نگاشت آنها به دستورات ربات
+    // این Mapping برای ارسال دستورات به ربات استفاده می‌شود.
     const actionButtonsMap = {
-        'extract-gold-btn': 'extract_gold',
-        'battle-btn': 'battle',
-        'my-realm-btn': 'my_realm',
-        'market-btn': 'market',
-        'sepah-btn': 'sepah',
-        'leaderboard-btn': 'leaderboard',
-        'extract-resources-btn': 'extract_resources',
-        'daily-reward-btn': 'daily_reward',
-        'direct-attack-btn': 'direct_attack',
-        'special-defense-btn': 'special_defense',
-        'sepah-war-btn': 'sepah_war',
-        'black-market-btn': 'black_market',
-        'game-group-btn': 'game_group',
-        'support-btn': 'support',
-        'arsenal-btn': 'arsenal',
-        'defense-equipment-btn': 'defense_equipment',
-        'battle-list-btn': 'battle_list',
-        'attack-bot-btn': 'attack_bot',
-        'invite-friends-btn': 'invite_friends',
-        'game-guide-btn': 'game_guide',
-        'statement-btn': 'statement',
-        'cyber-warfare-btn': 'cyber_warfare',
-        'transfer-resources-btn': 'transfer_resources',
-        'telegram-transfer-btn': 'telegram_transfer',
-        'admin-panel-btn': 'admin_panel'
+        'extract-gold-btn': { command: 'extract_gold', text: 'استخراج طلا' },
+        'battle-btn': { command: 'battle', text: 'نبرد' },
+        'my-realm-btn': { command: 'my_realm', text: 'قلمرو من' },
+        'market-btn': { command: 'market', text: 'بازار' },
+        'sepah-btn': { command: 'sepah', text: 'سپاه' },
+        'leaderboard-btn': { command: 'leaderboard', text: 'رتبه‌بندی' },
+        'extract-resources-btn': { command: 'extract_resources', text: 'استخراج منابع' },
+        'daily-reward-btn': { command: 'daily_reward', text: 'جایزه روزانه' },
+        'direct-attack-btn': { command: 'direct_attack', text: 'حمله مستقیم' },
+        'special-defense-btn': { command: 'special_defense', text: 'دفاع ویژه' },
+        'sepah-war-btn': { command: 'sepah_war', text: 'نبرد بین سپاهی' },
+        'black-market-btn': { command: 'black_market', text: 'بازار سیاه' },
+        'game-group-btn': { command: 'game_group', text: 'گروه بازی' },
+        'support-btn': { command: 'support', text: 'پشتیبانی' },
+        'arsenal-btn': { command: 'arsenal', text: 'زرادخانه' },
+        'defense-equipment-btn': { command: 'defense_equipment', text: 'تجهیزات دفاعی' },
+        'battle-list-btn': { command: 'battle_list', text: 'لیست نبردها' },
+        'attack-bot-btn': { command: 'attack_bot', text: 'حمله به بات' },
+        'invite-friends-btn': { command: 'invite_friends', text: 'دعوت دوستان' },
+        'game-guide-btn': { command: 'game_guide', text: 'راهنمای بازی' },
+        'statement-btn': { command: 'statement', text: 'بیانیه' },
+        'cyber-warfare-btn': { command: 'cyber_warfare', text: 'جنگ سایبری' },
+        'transfer-resources-btn': { command: 'transfer_resources', text: 'انتقال منابع' },
+        'telegram-transfer-btn': { command: 'telegram_transfer', text: 'انتقال به تلگرام' },
+        'admin-panel-btn': { command: 'admin_panel', text: 'پنل ادمین' }
     };
 
     // افزودن Event Listener به تمام دکمه‌ها و افکت Ripple
@@ -77,18 +76,17 @@ if (window.Telegram && window.Telegram.WebApp) {
                 const y = e.clientY - rect.top - (size / 2);
 
                 const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
                 ripple.style.width = ripple.style.height = `${size}px`;
                 ripple.style.left = `${x}px`;
                 ripple.style.top = `${y}px`;
-                ripple.classList.add('ripple');
                 button.appendChild(ripple);
 
-                // Remove ripple after animation
                 ripple.addEventListener('animationend', () => {
                     ripple.remove();
                 });
 
-                handleActionButtonClick(actionButtonsMap[btnId], button.innerText);
+                handleActionButtonClick(actionButtonsMap[btnId].command, actionButtonsMap[btnId].text);
             });
         }
     }
@@ -110,7 +108,6 @@ if (window.Telegram && window.Telegram.WebApp) {
     }
 
     // تابعی برای ارسال دستورات به ربات
-    // این تابع از WebApp.sendData() استفاده خواهد کرد.
     function sendCommandToBot(command, actionText, payload = {}) {
         const dataToSend = {
             command: command,
@@ -119,30 +116,37 @@ if (window.Telegram && window.Telegram.WebApp) {
         };
 
         // **اینجا نقطه اتصال به ربات پایتونی شماست!**
-        // WebApp.sendData() اطلاعات رو به ربات میفرسته.
+        // WebApp.sendData() اطلاعات رو به ربات بله میفرسته.
+        // طبق مستندات بله، بعد از sendData مینی‌اپ بسته می‌شود.
+        // پس اگر می‌خواهید مینی‌اپ باز بماند، باید از روش‌های دیگر (مثل WebSockets یا APIهای HTTP) استفاده کنید.
+        // اما برای سادگی و طبق مستندات فعلی، sendData را استفاده می‌کنیم.
         WebApp.sendData(JSON.stringify(dataToSend));
 
         console.log(`[Mini-App] ارسال دستور: "${command}" با داده:`, dataToSend);
         
-        WebApp.MainButton.text = `در حال انجام: ${actionText}...`;
-        WebApp.MainButton.showProgress(); // نمایش لودینگ روی MainButton
-        WebApp.MainButton.disable(); // غیرفعال کردن دکمه اصلی
+        // **در اینجا به جای MainButton تلگرام، از یک نوتیفیکیشن موقت استفاده می‌کنیم.**
+        // و برای شبیه‌سازی وضعیت، پیام نوتیفیکیشن را نمایش می‌دهیم.
+        // در حالت واقعی، پاسخ از ربات می‌آید.
+        WebApp.showNotification({
+            message: `دستور "${actionText}" ارسال شد. منتظر پاسخ ربات باشید...`,
+            type: 'info' // 'info', 'success', 'error'
+        });
 
         // **شبیه‌سازی دریافت پاسخ از ربات**
         // این قسمت باید در آینده توسط ربات واقعی شما مدیریت شود که پاسخ را به مینی‌اپ برگرداند.
-        // تا آن زمان، ما پاسخ را شبیه‌سازی می‌کنیم.
+        // فعلاً برای نمایش تغییرات، بعد از 2 ثانیه یک پاسخ شبیه‌سازی شده دریافت می‌کنیم.
         setTimeout(() => {
             const simulatedResponse = {
                 command: `${command}_response`,
                 status: 'success', // یا 'error'
                 message: `✅ دستور "${actionText}" با موفقیت انجام شد!`,
-                player_stats: { // اطلاعات بازیکن بعد از انجام عملیات (مثلاً بعد از جمع‌آوری)
-                    gold: Math.floor(Math.random() * 1000) + 1000,
+                player_stats: { // اطلاعات بازیکن بعد از انجام عملیات (مثلا بعد از جمع‌آوری)
+                    gold: Math.floor(Math.random() * 1000) + 1000 + (command === 'extract_gold' ? 500 : 0),
                     diamonds: Math.floor(Math.random() * 50) + 100,
-                    food: Math.floor(Math.random() * 5000) + 2000,
-                    blocks: Math.floor(Math.random() * 5000) + 2000,
-                    soldiers: Math.floor(Math.random() * 1000) + 500,
-                    walls: Math.floor(Math.random() * 500) + 200,
+                    food: Math.floor(Math.random() * 5000) + 2000 + (command === 'extract_resources' ? 1000 : 0),
+                    blocks: Math.floor(Math.random() * 5000) + 2000 + (command === 'extract_resources' ? 1000 : 0),
+                    soldiers: Math.floor(Math.random() * 1000) + 500 + (command === 'build_soldier' ? 100 : 0),
+                    walls: Math.floor(Math.random() * 500) + 200 + (command === 'build_wall' ? 50 : 0),
                     level: Math.floor(Math.random() * 10) + 1
                 }
             };
@@ -151,27 +155,16 @@ if (window.Telegram && window.Telegram.WebApp) {
     }
 
     // تابعی برای پردازش پاسخ‌های دریافتی از ربات
-    // این تابع در حالت واقعی، توسط WebApp.onEvent('messageFromBot', ...) فراخوانی می‌شود
+    // این تابع در حالت واقعی، توسط WebApp.onEvent('customEvent', ...) فراخوانی می‌شود
     function handleBotResponse(response) {
         console.log("[Mini-App] دریافت پاسخ از ربات:", response);
-        WebApp.MainButton.hideProgress(); // لودینگ رو مخفی می‌کنیم
-        WebApp.MainButton.enable(); // دکمه اصلی رو فعال می‌کنیم
-
+        
         if (response.status === 'success' && response.player_stats) {
             updatePlayerStats(response.player_stats);
-            WebApp.showNotification({
-                message: response.message,
-                type: 'success'
-            });
+            WebApp.showAlert(response.message); // از showAlert برای پیام‌های موفقیت‌آمیز استفاده می‌کنیم
         } else if (response.status === 'error') {
-            WebApp.showNotification({
-                message: `❌ خطا: ${response.message}`,
-                type: 'error'
-            });
+            WebApp.showAlert(`❌ خطا: ${response.message}`); // از showAlert برای پیام‌های خطا استفاده می‌کنیم
         }
-        // بازگرداندن متن دکمه اصلی به حالت پیش فرض
-        WebApp.MainButton.text = "به جنگاوران پارس خوش آمدید!";
-        WebApp.MainButton.color = isUserAdmin ? "#e83e8c" : "#007bff"; // رنگ ادمین یا پیش فرض
     }
 
     // هندلر کلیک دکمه‌های اقدامات
@@ -194,14 +187,9 @@ if (window.Telegram && window.Telegram.WebApp) {
         if (ADMIN_IDS_SIMULATED.includes(String(currentUserId))) {
             isUserAdmin = true;
             adminPanelBtn.classList.remove('hidden'); // نمایش دکمه ادمین
-            WebApp.MainButton.text = "شما ادمین هستید!";
-            WebApp.MainButton.color = "#e83e8c"; // رنگ ادمین
         } else {
             adminPanelBtn.classList.add('hidden'); // اطمینان از مخفی بودن دکمه ادمین
-            WebApp.MainButton.text = "به جنگاوران پارس خوش آمدید!";
-            WebApp.MainButton.color = "#007bff";
         }
-        WebApp.MainButton.show();
 
         // شبیه‌سازی اطلاعات اولیه بازیکن
         const initialPlayerStats = {
@@ -217,42 +205,42 @@ if (window.Telegram && window.Telegram.WebApp) {
 
         // مخفی کردن صفحه لودینگ و نمایش محتوای اصلی
         setTimeout(() => {
-            loadingScreen.style.opacity = '0';
+            loadingScreen.classList.add('fade-out'); // شروع انیمیشن fade-out
             loadingScreen.addEventListener('transitionend', () => {
                 loadingScreen.style.display = 'none';
-                mainContent.style.opacity = '1'; // شروع انیمیشن fadeIn برای محتوا
-                mainContent.style.transform = 'translateY(0)';
+                mainContent.classList.add('container-loaded'); // شروع انیمیشن fadeIn برای محتوا
             }, { once: true });
         }, 2000); // 2 ثانیه نمایش لودینگ
 
     } else {
         // اگر WebApp API لود نشد (مثلاً داری تو مرورگر تست می‌کنی)
+        // یا اطلاعات کاربر در دسترس نبود
         document.body.innerHTML = `
             <div class="container" style="text-align: center; margin-top: 50px;">
                 <h1>خطا در بارگذاری مینی‌اپ</h1>
-                <p>این مینی‌اپ باید از طریق <strong>تلگرام</strong> باز شود.</p>
-                <p>لطفاً ربات را در تلگرام باز کرده و سپس از طریق آن اقدام کنید.</p>
+                <p>این مینی‌اپ باید از طریق <strong>بله</strong> باز شود.</p>
+                <p>لطفاً ربات را در بله باز کرده و سپس از طریق آن اقدام کنید.</p>
             </div>
         `;
-        document.body.style.backgroundColor = 'var(--background-dark)';
-        document.body.style.color = 'var(--text-light)';
+        document.body.style.backgroundColor = 'var(--background-deep-dark)';
+        document.body.style.color = 'var(--text-main-light)';
         document.body.style.display = 'flex';
         document.body.style.justifyContent = 'center';
         document.body.style.alignItems = 'center';
-        WebApp.MainButton.hide();
+        loadingScreen.style.display = 'none'; // مطمئن شو لودینگ هم مخفی میشه
     }
 
 } else {
-    // برای حالتی که WebApp API اصلاً وجود نداره (نه فقط لود نشده)
+    // برای حالتی که Bale WebApp API اصلاً وجود نداره
     document.body.innerHTML = `
         <div class="container" style="text-align: center; margin-top: 50px;">
             <h1>خطا در بارگذاری مینی‌اپ</h1>
-            <p>این مینی‌اپ باید از طریق <strong>تلگرام</strong> باز شود.</p>
-            <p>لطفاً ربات را در تلگرام باز کرده و سپس از طریق آن اقدام کنید.</p>
+            <p>این مینی‌اپ باید از طریق <strong>بله</strong> باز شود.</p>
+            <p>لطفاً اپلیکیشن بله خود را به‌روزرسانی کنید یا از طریق ربات در بله اقدام کنید.</p>
         </div>
     `;
-    document.body.style.backgroundColor = 'var(--background-dark)';
-    document.body.style.color = 'var(--text-light)';
+    document.body.style.backgroundColor = 'var(--background-deep-dark)';
+    document.body.style.color = 'var(--text-main-light)';
     document.body.style.display = 'flex';
     document.body.style.justifyContent = 'center';
     document.body.style.alignItems = 'center';
