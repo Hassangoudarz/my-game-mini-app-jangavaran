@@ -4,22 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>جنگاوران پارس</title>
+    <script src="https://tapi.bale.ai/miniapp.js?3"></script>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://tapi.bale.ai/miniapp.js?3"></script> <style>
+    <style>
         :root {
             /* Palette inspired by your logo: gold, dark blue/slate, with accents */
             --primary-gold: #ffcc00; /* Main accent color */
             --secondary-blue: #34495e; /* Dark blue/slate from shield */
-            --background-deep-dark: #1a202c; /* Very dark background for depth */
-            --card-surface: #2d3748; /* Slightly lighter dark for card backgrounds */
+            --background-deep-dark: #121820; /* Very dark background for depth */
+            --card-surface: #1a222f; /* Slightly lighter dark for card backgrounds */
             --text-main-light: #e2e8f0; /* Soft white text */
-            --text-accent-green: #48bb78; /* A pleasant green for positive stats */
-            --button-main-bg: #4299e1; /* A vibrant blue for primary actions */
-            --button-main-hover: #3182ce;
-            --button-text: #ffffff;
-            --button-danger: #e53e3e; /* Red for destructive actions */
-            --button-danger-hover: #c53030;
-            --border-subtle: #4a5568; /* Subtle border color */
+            --text-secondary: #aeb6bf; /* Lighter gray for secondary text */
+            --accent-green: #2ecc71; /* A pleasant green for positive stats */
+            --button-bg: #1c2e4a; /* A sophisticated dark blue */
+            --button-bg-hover: #213a5c;
+            --button-text: #e2e8f0;
+            --button-danger: #e74c3c; /* Red for destructive actions */
+            --button-danger-hover: #c0392b;
+            --border-subtle: #2d3848; /* Subtle border color */
             --shadow-strong: rgba(0, 0, 0, 0.6);
             --border-radius-large: 16px;
             --border-radius-small: 8px;
@@ -36,7 +38,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px 10px;
+            padding: 15px;
             box-sizing: border-box;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
@@ -46,7 +48,8 @@
             background-position: center top 50px; /* Position it */
             background-repeat: no-repeat;
             background-attachment: fixed; /* Fixed background */
-            /* Dark overlay for readability */
+            background-blend-mode: overlay;
+            filter: grayscale(80%) brightness(30%);
             &::before {
                 content: '';
                 position: fixed;
@@ -54,7 +57,7 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background-color: rgba(0, 0, 0, 0.4); /* Dark overlay */
+                background: linear-gradient(to bottom, rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 1));
                 z-index: -1;
             }
         }
@@ -72,7 +75,7 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.6s ease-in-out;
+            transition: opacity 0.6s var(--transition-speed);
         }
 
         .spinner {
@@ -85,13 +88,10 @@
             margin-bottom: 25px;
             box-shadow: 0 0 15px var(--primary-gold);
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Fade out loading screen */
         .fade-out {
             opacity: 0;
             visibility: hidden;
@@ -111,8 +111,6 @@
             box-shadow: 0 8px 16px var(--shadow-strong);
             max-width: 500px;
             width: 100%;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-subtle);
             opacity: 0; /* Initially hidden */
             transform: translateY(30px); /* Start from slightly below */
             transition: opacity 0.8s var(--transition-medium), transform 0.8s var(--transition-medium);
@@ -123,7 +121,7 @@
             margin-bottom: 20px;
             font-size: 2.2em;
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
-            letter-spacing: 1px; /* Slightly more spaced */
+            letter-spacing: 1px;
         }
 
         h2 {
@@ -131,10 +129,10 @@
             margin-top: 30px;
             margin-bottom: 15px;
             font-size: 1.5em;
-            border-bottom: 2px solid var(--text-secondary);
+            border-bottom: 2px solid var(--border-subtle);
             padding-bottom: 8px;
             display: inline-block;
-            text-shadow: 0 0 5px rgba(189, 147, 249, 0.3);
+            text-shadow: 0 0 5px rgba(174, 182, 191, 0.3);
         }
 
         p {
@@ -144,7 +142,7 @@
         }
 
         .player-stats {
-            background-color: #3b4252; /* Slightly different dark shade */
+            background-color: #2b3545; /* Slightly different dark shade */
             padding: 20px;
             border-radius: var(--border-radius-small);
             margin-top: 20px;
@@ -159,26 +157,24 @@
             justify-content: space-between;
             align-items: center;
             padding: 5px 0;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1); /* Subtle separator */
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
         }
         .player-stats div:last-child {
             margin-bottom: 0;
             border-bottom: none;
         }
-
         .player-stats span {
             font-weight: bold;
             color: var(--text-main-light);
             font-size: 1.05em;
         }
         .player-stats strong {
-            color: var(--text-accent-green);
-            font-size: 1.2em; /* Larger for values */
+            color: var(--accent-green);
+            font-size: 1.2em;
             direction: ltr;
-            text-shadow: 0 0 5px rgba(72, 187, 120, 0.4);
+            text-shadow: 0 0 5px rgba(46, 204, 113, 0.4);
         }
-
-        /* Action Buttons Grid */
+        
         .main-actions {
             margin-top: 30px;
             display: grid;
@@ -187,35 +183,33 @@
         }
         
         button {
-            background-color: var(--button-main-bg);
+            background-color: var(--button-bg);
             color: var(--button-text);
-            border: none;
-            padding: 15px 10px; /* Generous padding */
+            border: 1px solid var(--primary-gold); /* Consistent border with primary gold */
+            padding: 15px 10px;
             border-radius: var(--border-radius-small);
             font-size: 1em;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
-            width: 100%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: all var(--transition-fast);
             position: relative;
             overflow: hidden;
-            letter-spacing: 0.5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
         button:hover {
-            background-color: var(--button-main-hover);
+            background-color: var(--button-bg-hover);
             transform: translateY(-3px) scale(1.02);
             box-shadow: 0 8px 16px var(--shadow-strong);
         }
-
         button:active {
             transform: translateY(0);
-            box-shadow: 0 2px 4px var(--shadow-color);
+            box-shadow: 0 2px 4px var(--shadow-subtle);
         }
-
-        /* Ripple effect for buttons */
+        
         .ripple {
             position: absolute;
             border-radius: 50%;
@@ -225,56 +219,46 @@
             transform: scale(0);
             opacity: 1;
         }
-
         @keyframes ripple-animation {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
+            to { transform: scale(4); opacity: 0; }
         }
 
-        /* Danger button specific style */
         #close-button {
             background-color: var(--button-danger);
-            margin-top: 30px;
-            width: fit-content;
-            padding: 12px 25px;
-            border-radius: var(--border-radius-small);
+            border: 1px solid var(--button-danger);
+            color: var(--button-text);
+            margin-top: 20px;
+            width: 100%;
+            max-width: 250px;
+            padding: 12px;
             box-shadow: 0 4px 8px var(--shadow-strong);
         }
         #close-button:hover {
             background-color: var(--button-danger-hover);
-            transform: translateY(-2px);
         }
 
-        /* Utility classes */
         .hidden {
             display: none !important;
         }
 
-        /* Adjustments for smaller screens */
         @media (max-width: 480px) {
             .main-actions {
                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
                 gap: 10px;
             }
             button {
-                font-size: 0.9em;
+                font-size: 0.85em;
                 padding: 12px 8px;
             }
-            h1 {
-                font-size: 2em;
-            }
-            h2 {
-                font-size: 1.3em;
-            }
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.2em; }
         }
     </style>
 </head>
 <body>
     <div id="loading-screen">
         <div class="spinner"></div>
-        <p style="font-size:1.2em; color:var(--text-main-light);">در حال ورود به دنیای جنگاوران پارس...</p>
+        <p style="font-size:1.2em;">در حال ورود به دنیای جنگاوران پارس...</p>
     </div>
 
     <div class="container" id="main-content">
@@ -321,7 +305,7 @@
             <button id="admin-panel-btn" class="hidden">⚙️ پنل ادمین ⚙️</button>
         </div>
     </div>
-
     <button id="close-button">بستن مینی‌اپ</button>
+    <script src="script.js"></script>
 </body>
 </html>

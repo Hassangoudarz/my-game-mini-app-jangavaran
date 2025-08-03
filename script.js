@@ -1,24 +1,15 @@
 // چک می‌کنیم که Bale Web App API آماده هست یا نه
-// API بله از window.Bale.WebApp استفاده می‌کند.
 if (window.Bale && window.Bale.WebApp) {
     const WebApp = window.Bale.WebApp;
 
-    // شروع لود شدن وب‌اپ
     WebApp.ready();
-    WebApp.expand(); // مینی‌اپ رو به حداکثر اندازه گسترش میده
+    WebApp.expand();
 
-    // تنظیم رنگ‌های هدر و پس‌زمینه تلگرام (اختیاری، اگر بله پشتیبانی کنه)
-    // بر اساس مستندات بله، این متدها در نسخه 1.1 موجودند
-    // WebApp.setHeaderColor('#2d3748'); // secondary_bg_color from :root
-    // WebApp.setBackgroundColor('#1a202c'); // background_deep_dark from :root
+    // تنظیم رنگ‌های هدر و پس‌زمینه در بله بر اساس تم مینی‌اپ
+    // این متدها در نسخه 1.1 Bale Mini App API موجود هستند.
+    WebApp.setHeaderColor('#1a222f'); // card-surface
+    WebApp.setBackgroundColor('#121820'); // background-deep-dark
 
-    // MainButton بله رو فعال می‌کنیم (اختیاری، اما برای UX خوبه)
-    // در بله، MainButton مستقیماً در API جاوااسکریپت وجود ندارد،
-    // اما می‌توانید از backButton یا sendData استفاده کنید.
-    // اگر MainButton تلگرام را می‌خواستید، در بله باید دکمه خودتان را طراحی کنید.
-    // فعلاً این بخش برای بله از WebApp.MainButton تلگرام برداشته شده.
-
-    // عناصر HTML برای نمایش اطلاعات
     const userInfoElement = document.getElementById('user-info');
     const goldAmountElement = document.getElementById('gold-amount');
     const diamondAmountElement = document.getElementById('diamond-amount');
@@ -27,15 +18,14 @@ if (window.Bale && window.Bale.WebApp) {
     const soldierAmountElement = document.getElementById('soldier-amount');
     const wallAmountElement = document.getElementById('wall-amount');
     const realmLevelElement = document.getElementById('realm-level');
-    const adminPanelBtn = document.getElementById('admin-panel-btn'); // دکمه ادمین
+    const adminPanelBtn = document.getElementById('admin-panel-btn');
     const loadingScreen = document.getElementById('loading-screen');
     const mainContent = document.getElementById('main-content');
 
-    let currentUserId = null; // برای ذخیره آیدی کاربر
-    let isUserAdmin = false; // برای وضعیت ادمین
+    let currentUserId = null;
+    let isUserAdmin = false;
 
-    // دکمه‌های اقدامات و نگاشت آنها به دستورات ربات
-    // این Mapping برای ارسال دستورات به ربات استفاده می‌شود.
+    // Mapping of button IDs to bot commands and display texts
     const actionButtonsMap = {
         'extract-gold-btn': { command: 'extract_gold', text: 'استخراج طلا' },
         'battle-btn': { command: 'battle', text: 'نبرد' },
@@ -64,40 +54,39 @@ if (window.Bale && window.Bale.WebApp) {
         'admin-panel-btn': { command: 'admin_panel', text: 'پنل ادمین' }
     };
 
-    // افزودن Event Listener به تمام دکمه‌ها و افکت Ripple
+    // Add Event Listeners to all action buttons with Ripple Effect
     for (const btnId in actionButtonsMap) {
         const button = document.getElementById(btnId);
         if (button) {
             button.addEventListener('click', (e) => {
-                // Ripple Effect
                 const rect = button.getBoundingClientRect();
                 const size = Math.max(rect.width, rect.height);
                 const x = e.clientX - rect.left - (size / 2);
                 const y = e.clientY - rect.top - (size / 2);
-
                 const ripple = document.createElement('span');
                 ripple.classList.add('ripple');
                 ripple.style.width = ripple.style.height = `${size}px`;
                 ripple.style.left = `${x}px`;
                 ripple.style.top = `${y}px`;
                 button.appendChild(ripple);
-
                 ripple.addEventListener('animationend', () => {
                     ripple.remove();
                 });
 
-                handleActionButtonClick(actionButtonsMap[btnId].command, actionButtonsMap[btnId].text);
+                const buttonData = actionButtonsMap[btnId];
+                handleActionButtonClick(buttonData.command, buttonData.text);
             });
         }
     }
 
-    // دکمه بستن مینی‌اپ
+    // Close Mini App Button
     document.getElementById('close-button').addEventListener('click', () => {
         WebApp.close();
     });
 
-    // تابعی برای به‌روزرسانی آمارهای بازیکن در UI
+    // Function to update player stats in UI
     function updatePlayerStats(stats) {
+        if (!stats) return;
         goldAmountElement.innerText = stats.gold.toLocaleString('fa-IR');
         diamondAmountElement.innerText = stats.diamonds.toLocaleString('fa-IR');
         foodAmountElement.innerText = stats.food.toLocaleString('fa-IR');
@@ -107,141 +96,99 @@ if (window.Bale && window.Bale.WebApp) {
         realmLevelElement.innerText = stats.level.toLocaleString('fa-IR');
     }
 
-    // تابعی برای ارسال دستورات به ربات
+    // Function to send commands to the bot
+    // IMPORTANT: WebApp.sendData() closes the mini-app in Bale.
     function sendCommandToBot(command, actionText, payload = {}) {
         const dataToSend = {
             command: command,
             user_id: currentUserId,
             payload: payload
         };
-
-        // **اینجا نقطه اتصال به ربات پایتونی شماست!**
-        // WebApp.sendData() اطلاعات رو به ربات بله میفرسته.
-        // طبق مستندات بله، بعد از sendData مینی‌اپ بسته می‌شود.
-        // پس اگر می‌خواهید مینی‌اپ باز بماند، باید از روش‌های دیگر (مثل WebSockets یا APIهای HTTP) استفاده کنید.
-        // اما برای سادگی و طبق مستندات فعلی، sendData را استفاده می‌کنیم.
-        WebApp.sendData(JSON.stringify(dataToSend));
-
-        console.log(`[Mini-App] ارسال دستور: "${command}" با داده:`, dataToSend);
         
-        // **در اینجا به جای MainButton تلگرام، از یک نوتیفیکیشن موقت استفاده می‌کنیم.**
-        // و برای شبیه‌سازی وضعیت، پیام نوتیفیکیشن را نمایش می‌دهیم.
-        // در حالت واقعی، پاسخ از ربات می‌آید.
-        WebApp.showNotification({
-            message: `دستور "${actionText}" ارسال شد. منتظر پاسخ ربات باشید...`,
-            type: 'info' // 'info', 'success', 'error'
-        });
+        WebApp.sendData(JSON.stringify(dataToSend));
+        console.log(`[Mini-App] Sent command: "${command}" with data:`, dataToSend);
 
-        // **شبیه‌سازی دریافت پاسخ از ربات**
-        // این قسمت باید در آینده توسط ربات واقعی شما مدیریت شود که پاسخ را به مینی‌اپ برگرداند.
-        // فعلاً برای نمایش تغییرات، بعد از 2 ثانیه یک پاسخ شبیه‌سازی شده دریافت می‌کنیم.
-        setTimeout(() => {
-            const simulatedResponse = {
-                command: `${command}_response`,
-                status: 'success', // یا 'error'
-                message: `✅ دستور "${actionText}" با موفقیت انجام شد!`,
-                player_stats: { // اطلاعات بازیکن بعد از انجام عملیات (مثلا بعد از جمع‌آوری)
-                    gold: Math.floor(Math.random() * 1000) + 1000 + (command === 'extract_gold' ? 500 : 0),
-                    diamonds: Math.floor(Math.random() * 50) + 100,
-                    food: Math.floor(Math.random() * 5000) + 2000 + (command === 'extract_resources' ? 1000 : 0),
-                    blocks: Math.floor(Math.random() * 5000) + 2000 + (command === 'extract_resources' ? 1000 : 0),
-                    soldiers: Math.floor(Math.random() * 1000) + 500 + (command === 'build_soldier' ? 100 : 0),
-                    walls: Math.floor(Math.random() * 500) + 200 + (command === 'build_wall' ? 50 : 0),
-                    level: Math.floor(Math.random() * 10) + 1
-                }
-            };
-            handleBotResponse(simulatedResponse);
-        }, 2000); // شبیه‌سازی 2 ثانیه تأخیر
+        // Show a temporary alert as the mini-app will close.
+        WebApp.showAlert(`دستور "${actionText}" به ربات ارسال شد. منتظر پاسخ در چت باشید.`);
     }
 
-    // تابعی برای پردازش پاسخ‌های دریافتی از ربات
-    // این تابع در حالت واقعی، توسط WebApp.onEvent('customEvent', ...) فراخوانی می‌شود
+    // Function to handle bot's response (simulated for now)
+    // In a real scenario, the bot would send back a message or an event.
+    // For Bale, direct response to an open mini-app is not as straightforward as Telegram's WebApp.postEvent.
+    // The bot sends a message to the chat.
     function handleBotResponse(response) {
-        console.log("[Mini-App] دریافت پاسخ از ربات:", response);
-        
+        console.log("[Mini-App] Received simulated response from bot:", response);
+        // We only update stats if the response is successful and contains player_stats
         if (response.status === 'success' && response.player_stats) {
             updatePlayerStats(response.player_stats);
-            WebApp.showAlert(response.message); // از showAlert برای پیام‌های موفقیت‌آمیز استفاده می‌کنیم
+            // Show alert in the mini-app if it remains open (unlikely with sendData)
+            WebApp.showAlert(response.message);
         } else if (response.status === 'error') {
-            WebApp.showAlert(`❌ خطا: ${response.message}`); // از showAlert برای پیام‌های خطا استفاده می‌کنیم
+            WebApp.showAlert(`❌ خطا: ${response.message}`);
         }
     }
 
-    // هندلر کلیک دکمه‌های اقدامات
+    // Main handler for action button clicks
     function handleActionButtonClick(command, actionText) {
-        sendCommandToBot(command, actionText);
+        // Here, we simulate the bot's response immediately for demonstration.
+        // In actual deployment, this part depends on the bot processing the `sendData` and sending a response.
+        simulateBotResponse(command, actionText);
     }
 
-    // **مهم: دریافت اطلاعات اولیه بازیکن در زمان لود شدن مینی‌اپ**
-    // این یک شبیه‌سازی است. در آینده باید ربات واقعی اطلاعات رو بفرسته.
+    // Initial load logic and simulated data
     if (WebApp.initDataUnsafe && WebApp.initDataUnsafe.user) {
-        currentUserId = WebApp.initDataUnsafe.user.id;
-        userInfoElement.innerText = `سلام، ${WebApp.initDataUnsafe.user.first_name || 'کاربر عزیز'}!`;
-        if (WebApp.initDataUnsafe.user.username) {
-            userInfoElement.innerText += ` (@${WebApp.initDataUnsafe.user.username})`;
+        const user = WebApp.initDataUnsafe.user;
+        currentUserId = user.id;
+        userInfoElement.innerText = `سلام، ${user.first_name || 'کاربر عزیز'}!`;
+        if (user.username) {
+            userInfoElement.innerText += ` (@${user.username})`;
         }
-        userInfoElement.innerText += `\nآیدی شما: ${WebApp.initDataUnsafe.user.id}`;
+        userInfoElement.innerText += `\nآیدی شما: ${user.id}`;
 
-        // شبیه‌سازی نقش ادمین (این باید توسط ربات تأیید شود)
-        const ADMIN_IDS_SIMULATED = ["8126836242", "1755368060"]; // آیدی‌های ادمین
+        // Simulate admin status
+        const ADMIN_IDS_SIMULATED = ["8126836242", "1755368060"]; // Replace with actual admin IDs
         if (ADMIN_IDS_SIMULATED.includes(String(currentUserId))) {
             isUserAdmin = true;
-            adminPanelBtn.classList.remove('hidden'); // نمایش دکمه ادمین
+            adminPanelBtn.classList.remove('hidden');
         } else {
-            adminPanelBtn.classList.add('hidden'); // اطمینان از مخفی بودن دکمه ادمین
+            adminPanelBtn.classList.add('hidden');
         }
 
-        // شبیه‌سازی اطلاعات اولیه بازیکن
+        // Simulate initial player stats
         const initialPlayerStats = {
-            gold: 5000,
-            diamonds: 1500,
-            food: 10000,
-            blocks: 8000,
-            soldiers: 2500,
-            walls: 1500,
-            level: 15
+            gold: 5000, diamonds: 1500, food: 10000, blocks: 8000,
+            soldiers: 2500, walls: 1500, level: 15
         };
         updatePlayerStats(initialPlayerStats);
 
-        // مخفی کردن صفحه لودینگ و نمایش محتوای اصلی
+        // Hide loading screen and show main content after a delay
         setTimeout(() => {
-            loadingScreen.classList.add('fade-out'); // شروع انیمیشن fade-out
+            loadingScreen.classList.add('fade-out');
             loadingScreen.addEventListener('transitionend', () => {
                 loadingScreen.style.display = 'none';
-                mainContent.classList.add('container-loaded'); // شروع انیمیشن fadeIn برای محتوا
+                mainContent.classList.add('container-loaded');
             }, { once: true });
-        }, 2000); // 2 ثانیه نمایش لودینگ
+        }, 2000);
 
     } else {
-        // اگر WebApp API لود نشد (مثلاً داری تو مرورگر تست می‌کنی)
-        // یا اطلاعات کاربر در دسترس نبود
+        // Fallback if WebApp API initDataUnsafe is not available
         document.body.innerHTML = `
-            <div class="container" style="text-align: center; margin-top: 50px;">
+            <div class="container">
                 <h1>خطا در بارگذاری مینی‌اپ</h1>
                 <p>این مینی‌اپ باید از طریق <strong>بله</strong> باز شود.</p>
                 <p>لطفاً ربات را در بله باز کرده و سپس از طریق آن اقدام کنید.</p>
             </div>
         `;
-        document.body.style.backgroundColor = 'var(--background-deep-dark)';
-        document.body.style.color = 'var(--text-main-light)';
-        document.body.style.display = 'flex';
-        document.body.style.justifyContent = 'center';
-        document.body.style.alignItems = 'center';
-        loadingScreen.style.display = 'none'; // مطمئن شو لودینگ هم مخفی میشه
+        document.getElementById('loading-screen').style.display = 'none';
     }
-
 } else {
-    // برای حالتی که Bale WebApp API اصلاً وجود نداره
+    // Fallback if Bale WebApp API is not loaded at all
     document.body.innerHTML = `
-        <div class="container" style="text-align: center; margin-top: 50px;">
+        <div class="container">
             <h1>خطا در بارگذاری مینی‌اپ</h1>
             <p>این مینی‌اپ باید از طریق <strong>بله</strong> باز شود.</p>
             <p>لطفاً اپلیکیشن بله خود را به‌روزرسانی کنید یا از طریق ربات در بله اقدام کنید.</p>
         </div>
     `;
-    document.body.style.backgroundColor = 'var(--background-deep-dark)';
-    document.body.style.color = 'var(--text-main-light)';
-    document.body.style.display = 'flex';
-    document.body.style.justifyContent = 'center';
-    document.body.style.alignItems = 'center';
+    document.getElementById('loading-screen').style.display = 'none';
 }
